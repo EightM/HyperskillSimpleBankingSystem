@@ -1,6 +1,12 @@
 package banking;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class BankAccount {
     private String cardNumber;
@@ -39,11 +45,30 @@ public class BankAccount {
     }
 
     private static long generateAccountIdentifier() {
-        return ThreadLocalRandom.current().nextLong(1000000000L, 9999999999L);
+        return ThreadLocalRandom.current().nextLong(100000000L, 999999999L);
     }
 
     private static String generateCardNumber() {
-        return "400000" + generateAccountIdentifier();
+        String cardNumberWithoutChecksum = "400000" + generateAccountIdentifier();
+        return cardNumberWithoutChecksum + generateCheckSum(cardNumberWithoutChecksum);
+    }
+
+    private static int generateCheckSum(String cardNumberWithoutChecksum) {
+        int sum = getLuhnBasedSumOfDigits(cardNumberWithoutChecksum);
+        return (100 - sum) % 10;
+    }
+
+    public static int getLuhnBasedSumOfDigits(String cardNumberWithoutChecksum) {
+        List<Integer> digits = Pattern.compile("").splitAsStream(cardNumberWithoutChecksum)
+                .map(Integer::valueOf)
+                .collect(Collectors.toList());
+        IntStream.range(0, digits.size())
+                .filter(i -> (i + 1) % 2 != 0)
+                .forEach(i -> digits.set(i, digits.get(i) * 2));
+        IntStream.range(0, digits.size())
+                .filter(i -> digits.get(i) > 9)
+                .forEach(i -> digits.set(i, digits.get(i) - 9));
+        return digits.stream().mapToInt(i -> i).sum();
     }
 
     private static int generatePin() {
