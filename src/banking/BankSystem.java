@@ -1,5 +1,6 @@
 package banking;
 
+import javax.xml.crypto.Data;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -24,6 +25,7 @@ public class BankSystem {
 
     public void createAccount() {
         BankAccount bankAccount = BankAccount.createNewBankAccount();
+        Database.save(bankAccount);
         accounts.put(bankAccount.getCardNumber(), bankAccount);
         System.out.println("Your card has been created");
         System.out.println("You card number:");

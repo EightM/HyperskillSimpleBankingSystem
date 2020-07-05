@@ -9,6 +9,10 @@ public class Main {
 
     public static void main(String[] args) {
 
+        String dbFilename = "db.s3db";
+        //String dbFilename = args[0];
+        Database.init(dbFilename);
+
         Scanner scanner = new Scanner(System.in);
         while (true) {
             if (isLogged) {
