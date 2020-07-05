@@ -1,14 +1,10 @@
 package banking;
 
-import javax.xml.crypto.Data;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Scanner;
 
 public class BankSystem {
 
-    private final Map<String, BankAccount> accounts = new HashMap<>();
     private BankAccount currentAccount;
 
     public void showStartMenu() {
@@ -26,7 +22,6 @@ public class BankSystem {
     public void createAccount() {
         BankAccount bankAccount = BankAccount.createNewBankAccount();
         Database.save(bankAccount);
-        accounts.put(bankAccount.getCardNumber(), bankAccount);
         System.out.println("Your card has been created");
         System.out.println("You card number:");
         System.out.println(bankAccount.getCardNumber());
@@ -42,7 +37,7 @@ public class BankSystem {
         int pinCode = Integer.parseInt(scanner.nextLine());
 
         boolean isValidCheckSum = checkCheckSum(cardNumber);
-        BankAccount bankAccount = accounts.get(cardNumber);
+        BankAccount bankAccount = Database.load(cardNumber, pinCode);
         if (!isValidCheckSum || bankAccount == null || bankAccount.getPin() != pinCode) {
             System.out.println("Wrong card number or PIN!");
             return false;

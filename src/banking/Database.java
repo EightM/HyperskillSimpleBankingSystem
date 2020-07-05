@@ -4,10 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.Objects;
 
 public class Database {
@@ -25,7 +22,7 @@ public class Database {
         Database.url = url;
     }
 
-    private static Connection getConnection(String url) {
+    private static Connection getConnection() {
         Connection connection = null;
         try {
             connection = DriverManager.getConnection(url);
@@ -52,16 +49,17 @@ public class Database {
     }
 
     private static void createCardTable() {
-        Connection connection = Database.getConnection(url);
+        Connection connection = Database.getConnection();
         Objects.requireNonNull(connection);
 
         String query = "create table if not exists card (" +
-                "id integer," +
-                "number text," +
-                "pin text," +
-                "balance integer default 0)";
+                "id INTEGER primary key," +
+                "number TEXT," +
+                "pin TEXT," +
+                "balance INTEGER DEFAULT 0)";
         try (Statement statement = connection.createStatement()){
             statement.executeUpdate(query);
+            connection.commit();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -80,5 +78,42 @@ public class Database {
     }
 
     public static void save(BankAccount bankAccount) {
+        Connection connection = Database.getConnection();
+        Objects.requireNonNull(connection);
+
+        String query = String.format("insert into card (number, pin) values (%s, %s)",
+                bankAccount.getCardNumber(), bankAccount.getPin());
+        try (Statement statement = connection.createStatement()) {
+            statement.executeUpdate(query);
+            connection.commit();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        Database.closeConnection(connection);
+    }
+
+    public static BankAccount load(String cardNumber, int pinCode) {
+        Connection connection = Database.getConnection();
+        Objects.requireNonNull(connection);
+
+        String query = String.format("select number, pin, balance from card where number = %s and pin = %s",
+                cardNumber, pinCode);
+        try (Statement statement = connection.createStatement();
+        ResultSet resultSet = statement.executeQuery(query)){
+            boolean found = resultSet.next();
+
+            if (found) {
+                BankAccount bankAccount = new BankAccount();
+                bankAccount.setBalance(resultSet.getInt("balance"));
+                bankAccount.setCardNumber(resultSet.getString("number"));
+                bankAccount.setPin(Integer.parseInt(resultSet.getString("pin")));
+                return bankAccount;
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 }

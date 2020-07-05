@@ -9,8 +9,12 @@ public class Main {
 
     public static void main(String[] args) {
 
-        String dbFilename = "db.s3db";
-        //String dbFilename = args[0];
+        // String dbFilename = "db.s3db";
+        if (args.length != 2) {
+            System.out.println("Please specify db name");
+            System.exit(0);
+        }
+        String dbFilename = args[1];
         Database.init(dbFilename);
 
         Scanner scanner = new Scanner(System.in);

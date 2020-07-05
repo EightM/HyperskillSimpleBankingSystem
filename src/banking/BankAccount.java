@@ -11,7 +11,8 @@ public class BankAccount {
     private int pin;
     private int balance;
 
-    private BankAccount() {}
+
+    public BankAccount() {}
 
     public static BankAccount createNewBankAccount() {
         BankAccount bankAccount = new BankAccount();
@@ -32,6 +33,18 @@ public class BankAccount {
 
     public double getBalance() {
         return balance;
+    }
+
+    public void setCardNumber(String cardNumber) {
+        this.cardNumber = cardNumber;
+    }
+
+    public void setPin(int pin) {
+        this.pin = pin;
+    }
+
+    public void setBalance(int balance) {
+        this.balance = balance;
     }
 
     @Override
