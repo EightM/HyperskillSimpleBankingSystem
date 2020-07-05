@@ -31,7 +31,7 @@ public class BankAccount {
         return pin;
     }
 
-    public double getBalance() {
+    public int getBalance() {
         return balance;
     }
 

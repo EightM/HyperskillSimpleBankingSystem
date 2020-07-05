@@ -1,5 +1,6 @@
 package banking;
 
+import javax.xml.crypto.Data;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -112,8 +113,68 @@ public class Database {
 
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            Database.closeConnection(connection);
         }
 
         return null;
+    }
+
+    public static BankAccount load(String cardNumber) {
+        Connection connection = Database.getConnection();
+        Objects.requireNonNull(connection);
+
+        String query = String.format("select number, balance from card where number = %s",
+                cardNumber);
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(query)){
+            boolean found = resultSet.next();
+
+            if (found) {
+                BankAccount bankAccount = new BankAccount();
+                bankAccount.setBalance(resultSet.getInt("balance"));
+                bankAccount.setCardNumber(resultSet.getString("number"));
+                return bankAccount;
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            Database.closeConnection(connection);
+        }
+
+        return null;
+    }
+
+    public static void update(BankAccount bankAccount) {
+        Connection connection = Database.getConnection();
+        Objects.requireNonNull(connection);
+
+        String query = String.format("update card set balance = %s where number = %s",
+                bankAccount.getBalance(), bankAccount.getCardNumber());
+        try (Statement statement = connection.createStatement()) {
+            statement.executeUpdate(query);
+            connection.commit();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        Database.closeConnection(connection);
+    }
+
+    public static void delete(BankAccount bankAccount) {
+        Connection connection = Database.getConnection();
+        Objects.requireNonNull(connection);
+
+        String query = String.format("delete from card where number = %s",
+                bankAccount.getCardNumber());
+        try (Statement statement = connection.createStatement()) {
+            statement.executeUpdate(query);
+            connection.commit();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        Database.closeConnection(connection);
     }
 }
